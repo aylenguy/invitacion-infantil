@@ -28,31 +28,32 @@ const poppins = Poppins({
 
 export default function InvitacionUnicornio() {
   const [color, setColor] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-
-  // Lógica de Cuenta Regresiva
-  const [timeLeft, setTimeLeft] = useState({ dias: 0, horas: 0, min: 0 });
+  
+// 1. Agregamos "seg" al estado inicial
+  const [timeLeft, setTimeLeft] = useState({ dias: 0, horas: 0, min: 0, seg: 0 });
 
   useEffect(() => {
-    const targetDate = new Date("2026-07-12T16:00:00"); // Ajustar año según corresponda
-    const timer = setInterval(() => {
-      const now = new Date();
-      const difference = targetDate.getTime() - now.getTime();
+    const targetDate = new Date(2026, 6, 12, 16, 0, 0).getTime();
 
-      setTimeLeft({
-        dias: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        horas: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        min: Math.floor((difference / 1000 / 60) % 60),
-      });
-    }, 1000);
+    const updateTimer = () => {
+      const now = new Date().getTime();
+      const difference = targetDate - now;
+
+      if (difference > 0) {
+        setTimeLeft({
+          dias: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          horas: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          min: Math.floor((difference / 1000 / 60) % 60),
+          seg: Math.floor((difference / 1000) % 60), // <-- Cálculo de segundos
+        });
+      }
+    };
+
+    updateTimer();
+    const timer = setInterval(updateTimer, 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const copiarCBU = () => {
-    navigator.clipboard.writeText("VALENTINA.MAGIA.5"); // Alias de ejemplo
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   return (
 <main className={`overflow-x-hidden bg-gradient-to-b from-[#fff0fb] via-[#f3ecff] to-[#eaf6ff] ${poppins.className}`}> {/* HERO SECTION */}
@@ -108,17 +109,26 @@ className={`${bebas.className} text-7xl md:text-9xl tracking-wider text-white dr
   </div>
 </section>
 
-      {/* CUENTA REGRESIVA */}
-      <section className="py-12 bg-white/50 backdrop-blur-md">
-        <div className="max-w-md mx-auto grid grid-cols-3 gap-4 px-6 text-center">
-          {Object.entries(timeLeft).map(([label, value]) => (
-            <div key={label} className="bg-white p-4 rounded-2xl shadow-sm border border-pink-100">
-              <span className="block text-3xl font-bold text-purple-600">{value < 0 ? 0 : value}</span>
-              <span className="text-xs uppercase text-pink-400 font-bold">{label}</span>
-            </div>
-          ))}
-        </div>
-      </section>
+     {/* CUENTA REGRESIVA */}
+<section className="py-12 bg-white/50 backdrop-blur-md">
+  {/* Usamos grid-cols-4 para que entren Días, Horas, Min y Seg en la misma línea */}
+  <div className="max-w-2xl mx-auto grid grid-cols-4 gap-2 md:gap-4 px-2 md:px-6 text-center">
+    {Object.entries(timeLeft).map(([label, value]) => (
+      <div 
+        key={label} 
+        className="bg-white p-2 md:p-4 rounded-xl md:rounded-2xl shadow-sm border border-pink-100 flex flex-col justify-center items-center"
+      >
+        {/* El texto se ajusta dinámicamente para no romperse en pantallas chicas */}
+        <span className="block text-xl sm:text-2xl md:text-4xl font-bold text-purple-600">
+          {value < 10 ? `0${value}` : value}
+        </span>
+        <span className="text-[10px] md:text-xs uppercase text-pink-400 font-bold truncate w-full">
+          {label}
+        </span>
+      </div>
+    ))}
+  </div>
+</section>
 
       {/* FRASE INTERACTIVA */}
      <section className="text-center py-20 px-6 bg-gradient-to-b from-[#0f0f1a] to-[#1a1a2e] text-white">
@@ -189,22 +199,33 @@ className="text-3xl md:text-4xl max-w-2xl mx-auto font-semibold text-[#ff4fd8] t
             <p className="text-3xl font-bold text-pink-500">16:00 HS</p>
           </motion.div>
 
-          <motion.div 
-            whileHover={{ y: -5 }}
-            className="bg-white rounded-[2rem] p-10 shadow-xl border-b-8 border-blue-200 text-center"
-          >
-            <MapPin className="mx-auto mb-4 text-blue-400" size={48} />
-            <h3 className="text-2xl font-bold text-purple-700">Ubicación</h3>
-            <p className="text-lg mt-2 text-gray-600 italic">Salón "Nubes Mágicas"</p>
-            <p className="mb-6 font-medium">Av. De las Estrellas 777</p>
-            <a 
-              href="https://maps.google.com" // Cambiar por link real
-              target="_blank"
-              className="inline-flex items-center gap-2 bg-blue-400 text-white px-6 py-2 rounded-full text-sm font-bold hover:bg-blue-500 transition shadow-lg"
-            >
-              <Navigation size={16} /> CÓMO LLEGAR
-            </a>
-          </motion.div>
+         <motion.div 
+  whileHover={{ y: -5 }}
+  className="bg-white rounded-[2rem] p-10 shadow-xl border-b-8 border-blue-200 text-center"
+>
+  <MapPin className="mx-auto mb-4 text-blue-300" size={48} />
+  
+  <h3 className="text-2xl font-extrabold text-purple-800 uppercase tracking-widest">
+    Ubicación
+  </h3>
+  
+  <div className="space-y-1 mt-4 mb-8">
+ <p className="text-2xl font-medium text-gray-900 border-b border-gray-200 pb-2 mb-2">
+  Salón Nubes Mágicas
+</p>
+   <p className="text-gray-700 font-medium tracking-tight">
+  Av. De las Estrellas 777, <span className="text-blue-500 font-bold">Rosario</span>
+</p>
+  </div>
+
+  <a 
+    href="https://maps.google.com" 
+    target="_blank"
+    className="inline-flex items-center gap-2 border-2 border-blue-400 text-blue-500 px-6 py-2 rounded-full text-xs font-bold hover:bg-blue-50 transition"
+  >
+    <Navigation size={14} /> VER UBICACIÓN
+  </a>
+</motion.div>
         </div>
       </section>
 
